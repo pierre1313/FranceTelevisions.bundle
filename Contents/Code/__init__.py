@@ -1,4 +1,4 @@
-﻿# PMS plugin framework
+Ôªø# PMS plugin framework
 from PMS import *
 from PMS.Objects import *
 from PMS.Shortcuts import *
@@ -8,7 +8,7 @@ import re
 
 PLUGIN_PREFIX           = "/video/francetelevisions"
 PLUGIN_ID               = "com.plexapp.plugins.francetelevisions"
-PLUGIN_REVISION         = 0.2
+PLUGIN_REVISION         = 0.4
 PLUGIN_UPDATES_ENABLED  = True
 
 PLAYER_PATH = "mms://a988.v101995.c10199.e.vm.akamaistream.net/7/988/10199/3f97c7e6/ftvigrp.download.akamai.com/10199/cappuccino/production/publication/"
@@ -56,71 +56,74 @@ def VideoMainMenu():
     dir = MediaContainer(viewGroup="List")
 
     dir.Append(Function(DirectoryItem(RSS_parser,"Tous les programmes"),pageurl = "http://www.pluzz.fr/rss" ))
-    dir.Append(Function(DirectoryItem(ChannelSubMenu,"Par chaîne")))
+    dir.Append(Function(DirectoryItem(ChannelSubMenu,"Par cha√Æne")))
     dir.Append(Function(DirectoryItem(GenreSubMenu,"Par genre")))
-    dir.Append(Function(DirectoryItem(RegionSubMenu,"Par région")))
+    dir.Append(Function(DirectoryItem(RegionSubMenu,"Par r√©gion")))
+    
     return dir
 
 def ChannelSubMenu (sender):
-    dir = MediaContainer(title2="Chaînes", viewGroup="Showcase", noCache=True)
+    dir = MediaContainer(title2="Cha√Ænes", viewGroup="Showcase", noCache=True)
 
-    dir.Append(Function(DirectoryItem(RSS_parser,"France2",thumb="http://www.francetelevisions.fr/images/france2_logo.gif"),pageurl = "http://www.pluzz.fr/france2/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France3",thumb="http://www.francetelevisions.fr/images/france3_logo.gif"),pageurl = "http://www.pluzz.fr/france3/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France4",thumb="http://www.francetelevisions.fr/images/france4_logo.gif"),pageurl = "http://www.pluzz.fr/france4/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France5",thumb="http://www.francetelevisions.fr/images/france5_logo.gif"),pageurl = "http://www.pluzz.fr/france5/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"FranceO",thumb="http://www.francetelevisions.fr/images/franceO_logo.gif"),pageurl = "http://www.pluzz.fr/franceo/rss" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France2",thumb="http://www.francetelevisions.fr/images/france2_logo.gif"),pageurl = "http://feeds.feedburner.com/Pluzz-France2?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France3",thumb="http://www.francetelevisions.fr/images/france3_logo.gif"),pageurl = "http://feeds.feedburner.com/Pluzz-France3?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France4",thumb="http://www.francetelevisions.fr/images/france4_logo.gif"),pageurl = "http://feeds.feedburner.com/Pluzz-France4?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France5",thumb="http://www.francetelevisions.fr/images/france5_logo.gif"),pageurl = "http://feeds.feedburner.com/Pluzz-France5?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"FranceO",thumb="http://www.francetelevisions.fr/images/franceO_logo.gif"),pageurl = "http://feeds.feedburner.com/Pluzz-FranceO?format=xml" ))
+
     return dir
 
 def GenreSubMenu (sender):
     dir = MediaContainer(title2="Genre", viewGroup="List", noCache=True)
 
-    dir.Append(Function(DirectoryItem(RSS_parser,"JT"),pageurl = "http://www.pluzz.fr/jt/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Découverte"),pageurl = "http://www.pluzz.fr/decouverte/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Séries - Fictions"),pageurl = "http://www.pluzz.fr/series---fictions/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Vie Pratique"),pageurl = "http://www.pluzz.fr/vie-pratique/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Culture"),pageurl = "http://www.pluzz.fr/culture/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Actu - Societé"),pageurl = "http://www.pluzz.fr/actu---societe/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Ludo"),pageurl = "http://www.pluzz.fr/ludo/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Divertissements"),pageurl = "http://www.pluzz.fr/divertissement/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Sports"),pageurl = "http://www.pluzz.fr/sports/rss" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"JT"),pageurl = "http://feeds.feedburner.com/Pluzz-Jt?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"D√©couverte"),pageurl = "http://feeds.feedburner.com/Pluzz-Decouverte?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"S√©ries - Fictions"),pageurl = "http://feeds.feedburner.com/Pluzz-Seriesfictions?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Vie Pratique"),pageurl = "http://feeds.feedburner.com/Pluzz-Viepratique?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Culture"),pageurl = "http://feeds.feedburner.com/Pluzz-Culture?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Actu - Societ√©"),pageurl = "http://feeds.feedburner.com/Pluzz-Actusociete?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Ludo"),pageurl = "http://feeds.feedburner.com/Pluzz-Ludo?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Divertissements"),pageurl = "http://feeds.feedburner.com/Pluzz-Divertissement?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Sports"),pageurl = "http://feeds.feedburner.com/Pluzz-Sports?format=xml" ))
+
     return dir
 
 def RegionSubMenu (sender):
     dir = MediaContainer(title2="Regions", viewGroup="List", noCache=True)
 
-    dir.Append(Function(DirectoryItem(RSS_parser,"Alsace"),pageurl = "http://www.pluzz.fr/alsace/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Aquitaine"),pageurl = "http://www.pluzz.fr/aquitaine/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Bourgogne"),pageurl = "http://www.pluzz.fr/bourgogne/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Franche-Comté"),pageurl = "http://www.pluzz.fr/franche-comte/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Corse"),pageurl = "http://www.pluzz.fr/corse/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Limousin"),pageurl = "http://www.pluzz.fr/limousin/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Poitou-Charentes"),pageurl = "http://www.pluzz.fr/poitou-charentes/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Lorraine"),pageurl = "http://www.pluzz.fr/lorraine/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Champagne-Ardenne"),pageurl = "http://www.pluzz.fr/champ[agne-ardenne/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Provence-Alpes"),pageurl = "http://www.pluzz.fr/provence-alpes/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Côte d'Azur"),pageurl = "http://www.pluzz.fr/cote-d-azur/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Nord-Pas-de-Calais"),pageurl = "http://www.pluzz.fr/nord-pas-de-calais/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Picardie"),pageurl = "http://www.pluzz.fr/picardie/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Haute-Normandie"),pageurl = "http://www.pluzz.fr/haute-normandie/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Basse-Normandie"),pageurl = "http://www.pluzz.fr/basse-normandie/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Bretagne"),pageurl = "http://www.pluzz.fr/bretagne/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Pays de la Loire"),pageurl = "http://www.pluzz.fr/pays-de-la-loire/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Paris Ile-de-France"),pageurl = "http://www.pluzz.fr/paris-ile-de-france/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Centre"),pageurl = "http://www.pluzz.fr/centre/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Rhône-Alpes"),pageurl = "http://www.pluzz.fr/rhone-alpes/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Auvergne"),pageurl = "http://www.pluzz.fr/auvergne/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Alpes"),pageurl = "http://www.pluzz.fr/alpes/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Midi-Pyrénées"),pageurl = "http://www.pluzz.fr/midi-pyrenees/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Languedoc-Roussillon"),pageurl = "http://www.pluzz.fr/langedoc-rousillon/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Réunion"),pageurl = "http://www.pluzz.fr/reunion/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Guyane"),pageurl = "http://www.pluzz.fr/guyane/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Polynésie"),pageurl = "http://www.pluzz.fr/polynesie/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Martinique"),pageurl = "http://www.pluzz.fr/martinique/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Mayotte"),pageurl = "http://www.pluzz.fr/mayotte/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Nouvelle Calédonie"),pageurl = "http://www.pluzz.fr/nouvelle-caledonie/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Guadeloupe"),pageurl = "http://www.pluzz.fr/guadeloupe/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Wallis et Futuna"),pageurl = "http://www.pluzz.fr/wallis-et-futuna/rss" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"Saint-Pierre et Miquelon"),pageurl = "http://www.pluzz.fr/saint-pierre-et-miquelon/rss" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Alsace"),pageurl = "http://feeds.feedburner.com/Pluzz-Alsace?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Aquitaine"),pageurl = "http://feeds.feedburner.com/Pluzz-Aquitaine?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Bourgogne"),pageurl = "http://feeds.feedburner.com/Pluzz-Bourgogne?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Franche-Comt√©"),pageurl = "http://feeds.feedburner.com/Pluzz-Franche-comte?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Corse"),pageurl = "http://feeds.feedburner.com/Pluzz-Corse?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Limousin"),pageurl = "http://feeds.feedburner.com/Pluzz-Limousin?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Poitou-Charentes"),pageurl = "http://feeds.feedburner.com/Pluzz-Poitou-charentes?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Lorraine"),pageurl = "http://feeds.feedburner.com/Pluzz-Lorraine?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Champagne-Ardenne"),pageurl = "http://feeds.feedburner.com/Pluzz-Champagne-ardenne?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Provence-Alpes"),pageurl = "http://feeds.feedburner.com/Pluzz-Provence-alpes?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"C√¥te d'Azur"),pageurl = "http://feeds.feedburner.com/Pluzz-Cote-d-azur?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Nord-Pas-de-Calais"),pageurl = "http://feeds.feedburner.com/Pluzz-Nord-pas-de-calais?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Picardie"),pageurl = "http://feeds.feedburner.com/Pluzz-Picardie?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Haute-Normandie"),pageurl = "http://feeds.feedburner.com/Pluzz-Haute-normandie?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Basse-Normandie"),pageurl = "http://feeds.feedburner.com/Pluzz-Basse-normandie?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Bretagne"),pageurl = "http://feeds.feedburner.com/Pluzz-Bretagne?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Pays de la Loire"),pageurl = "http://feeds.feedburner.com/Pluzz-Pays-de-la-loire?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Paris Ile-de-France"),pageurl = "http://feeds.feedburner.com/Pluzz-Paris-ile-de-france?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Centre"),pageurl = "http://feeds.feedburner.com/Pluzz-Centre?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Rh√¥ne-Alpes"),pageurl = "http://feeds.feedburner.com/Pluzz-Rhone-alpes?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Auvergne"),pageurl = "http://feeds.feedburner.com/Pluzz-Auvergne?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Alpes"),pageurl = "http://feeds.feedburner.com/Pluzz-Alpes?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Midi-Pyr√©n√©es"),pageurl = "http://feeds.feedburner.com/Pluzz-Midi-pyrenees?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Languedoc-Roussillon"),pageurl = "http://feeds.feedburner.com/Pluzz-Langedoc-rousillon?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"R√©union"),pageurl = "http://feeds.feedburner.com/Pluzz-Reunion?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Guyane"),pageurl = "http://feeds.feedburner.com/Pluzz-Guyane?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Polyn√©sie"),pageurl = "http://feeds.feedburner.com/Pluzz-Polynesie?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Martinique"),pageurl = "http://feeds.feedburner.com/Pluzz-Martinique?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Mayotte"),pageurl = "http://feeds.feedburner.com/Pluzz-Mayotte?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Nouvelle Cal√©donie"),pageurl = "http://feeds.feedburner.com/Pluzz-Nouvelle-caledonie?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Guadeloupe"),pageurl = "http://feeds.feedburner.com/Pluzz-Guadeloupe?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Wallis et Futuna"),pageurl = "http://feeds.feedburner.com/Pluzz-Wallis-et-futuna?format=xml" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Saint-Pierre et Miquelon"),pageurl = "http://feeds.feedburner.com/Pluzz-Saint-pierre-et-miquelon?format=xml" ))
 
     return dir
 
