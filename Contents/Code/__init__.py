@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-from PMS import *
-from PMS.Objects import *
-from PMS.Shortcuts import *
-
 ####################################################################################################
 
 PLUGIN_PREFIX           = "/video/francetelevisions"
@@ -22,7 +18,7 @@ LOGO_URL = "http://www.francetelevisions.fr/images/france%s_logo.gif"
 
 ####################################################################################################
 
-def Start():
+def Start(): 
 
     Plugin.AddPrefixHandler(PLUGIN_PREFIX, VideoMainMenu, NAME, ICON, ART)
 
@@ -112,38 +108,45 @@ def RegionSubMenu (sender):
 
 def get_stream (url):
     try:
-      link = XML.ElementFromURL(url,True).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
-      content = XML.ElementFromURL(link,True).xpath("head/meta[@name='urls-url-video']")
+      link = HTML.ElementFromURL(url).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
+      content = HTML.ElementFromURL(link).xpath("head/meta[@name='urls-url-video']")
       for item in content:
         videopath = item.get("content")
         if videopath != None:
-          name = unicode(PLAYER_PATH + "/" + videopath,"utf-8")
+          return unicode(PLAYER_PATH + "/" + videopath,"utf-8")
         else:
-          content = XML.ElementFromURL(link,True).xpath("head/meta[@name='vignette-type-lien-externe-url']")
+          content = HTML.ElementFromURL(link).xpath("head/meta[@name='vignette-type-lien-externe-url']")
           for item in content:
             videopath = item.get("content")
             if videopath != None:
-              name = unicode(videopath,"utf-8")
+              return unicode(videopath,"utf-8")
             else:
-              return (None, None)
-        
-      content = XML.ElementFromURL(url,True).xpath("head/meta[@name='programme_image']")
+              return None
+    except:
+      return None
+
+def get_thumb (url):
+    try:
+      content = HTML.ElementFromURL(url).xpath("head/meta[@name='programme_image']")
       for item in content:
         imagepath = item.get("content")
+        Log(imagepath)
         if imagepath != None:
-          vignette =  unicode("http://www.pluzz.fr" + imagepath,"utf-8")
+          if 'http' in imagepath:
+            return DataObject(HTTP.Request(imagepath).content,'image/'+imagepath[-3:])
+          else:
+            return DataObject(HTTP.Request(unicode("http://www.pluzz.fr" + imagepath,"utf-8")).content,'image/'+imagepath[-3:])
         else:
-          vignette = None
-         
-      return (name,vignette)
+          return R(ICON)
     except:
-      return (None, None)
+      return R(ICON)
 
 def RSS_parser(sender, pageurl , replaceParent=False,):
     dir = MediaContainer(title2=sender.itemTitle, viewGroup="List", replaceParent=replaceParent)
-    for tag in XML.ElementFromURL(pageurl).xpath('//item'):
-      (stream , vignette) = get_stream(unicode(tag.xpath("link")[0].text,"utf-8"))
-      if stream != None:
-        dir.Append(WindowsMediaVideoItem(stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=vignette))
+    for tag in XML.ElementFromURL(pageurl,encoding = "iso-8859-1").xpath('//item'):
+      url = unicode(tag.xpath("link")[0].text,"utf-8")
+      title = tag.xpath("title")[0].text
+      if title != None:
+        dir.Append(Function(WindowsMediaVideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=Function(get_thumb, url = url)),url=url))
 
     return dir
