@@ -106,20 +106,20 @@ def RegionSubMenu (sender):
 
     return dir
 
-def get_stream (url):
+def get_stream (sender,url):
     try:
       link = HTML.ElementFromURL(url).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
       content = HTML.ElementFromURL(link).xpath("head/meta[@name='urls-url-video']")
       for item in content:
         videopath = item.get("content")
         if videopath != None:
-          return unicode(PLAYER_PATH + "/" + videopath,"utf-8")
+          return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
         else:
           content = HTML.ElementFromURL(link).xpath("head/meta[@name='vignette-type-lien-externe-url']")
           for item in content:
             videopath = item.get("content")
             if videopath != None:
-              return unicode(videopath,"utf-8")
+              return Redirect(WindowsMediaVideoItem(unicode(videopath,"utf-8")))
             else:
               return None
     except:
@@ -147,6 +147,6 @@ def RSS_parser(sender, pageurl , replaceParent=False,):
       url = unicode(tag.xpath("link")[0].text,"utf-8")
       title = tag.xpath("title")[0].text
       if title != None:
-        dir.Append(Function(WindowsMediaVideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=Function(get_thumb, url = url)),url=url))
+        dir.Append(Function(VideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=Function(get_thumb, url = url)),url=url))
 
     return dir
