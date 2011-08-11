@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 ####################################################################################################
+import re
 
 PLUGIN_PREFIX           = "/video/francetelevisions"
 PLUGIN_ID               = "com.plexapp.plugins.francetelevisions"
@@ -7,16 +8,39 @@ PLUGIN_REVISION         = 0.6
 PLUGIN_UPDATES_ENABLED  = True
 
 PLAYER_PATH = "mms://a988.v101995.c10199.e.vm.akamaistream.net/7/988/10199/3f97c7e6/ftvigrp.download.akamai.com/10199/cappuccino/production/publication/"
+INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
 
 NAME = L('France Televisions')
 
-ART           = 'art-default.png'
+ART           = 'art-default.jpg'
 ICON          = 'icon-default.png'
 
 FEED_BASE_URL = "http://feeds.feedburner.com/Pluzz-%s?format=xml"
 LOGO_URL = "http://www.francetelevisions.fr/images/france%s_logo.gif"
 
-####################################################################################################
+####################################################################################################  
+
+import urllib2, httplib
+class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+    def http_error_404(self, req, fp, code, msg, headers):
+        result = urllib2.HTTPRedirectHandler.http_error_404(
+            self, req, fp, code, msg, headers)
+        Log(msg)
+        return result
+
+    def http_error_302(self, req, fp, code, msg, headers):
+        result = urllib2.HTTPRedirectHandler.http_error_302(
+            self, req, fp, code, msg, headers)
+        result.status = code
+        return result
+        
+    def http_error_301(self, req, fp, code, msg, headers):
+        result = urllib2.HTTPRedirectHandler.http_error_301(
+            self, req, fp, code, msg, headers)
+        result.status = code
+        return result
+        
+###################################################################################################
 
 def Start(): 
 
@@ -29,6 +53,9 @@ def Start():
     MediaContainer.art = R(ART)
     MediaContainer.title1 = NAME
     DirectoryItem.thumb = R(ICON)
+    
+    HTTP.Headers["User-agent"] = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.19) Gecko/20110707 Firefox/3.6.19"
+
 
 def VideoMainMenu():
 
@@ -44,11 +71,12 @@ def VideoMainMenu():
 def ChannelSubMenu (sender):
     dir = MediaContainer(title2="Chaînes", viewGroup="Coverflow")
 
-    dir.Append(Function(DirectoryItem(RSS_parser,"France2",thumb=LOGO_URL % '2'),pageurl = FEED_BASE_URL % "France2" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France3",thumb=LOGO_URL % '3'),pageurl = FEED_BASE_URL % "France3" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France4",thumb=LOGO_URL % '4'),pageurl = FEED_BASE_URL % "France4" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"France5",thumb=LOGO_URL % '5'),pageurl = FEED_BASE_URL % "France5" ))
-    dir.Append(Function(DirectoryItem(RSS_parser,"FranceO",thumb=LOGO_URL % 'O'),pageurl = FEED_BASE_URL % "FranceO" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"La 1ere",thumb=R('1ere-logo.png')),pageurl = FEED_BASE_URL % "La_1ere" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France2",thumb=R('France2-logo.png')),pageurl = FEED_BASE_URL % "France2" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France3",thumb=R('France3-logo.png')),pageurl = FEED_BASE_URL % "France3" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France4",thumb=R('France4-logo.png')),pageurl = FEED_BASE_URL % "France4" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"France5",thumb=R('France5-logo.png')),pageurl = FEED_BASE_URL % "France5" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"FranceO",thumb=R('FranceO-logo.png')),pageurl = FEED_BASE_URL % "FranceO" ))
 
     return dir
 
@@ -109,19 +137,15 @@ def RegionSubMenu (sender):
 def get_stream (sender,url):
     try:
       link = HTML.ElementFromURL(url).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
-      content = HTML.ElementFromURL(link).xpath("head/meta[@name='urls-url-video']")
-      for item in content:
-        videopath = item.get("content")
-        if videopath != None:
-          return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
-        else:
-          content = HTML.ElementFromURL(link).xpath("head/meta[@name='vignette-type-lien-externe-url']")
-          for item in content:
-            videopath = item.get("content")
-            if videopath != None:
-              return Redirect(WindowsMediaVideoItem(unicode(videopath,"utf-8")))
-            else:
-              return None
+      content = HTTP.Request(INFO_PATH + link.split('=')[-1]).content
+      content = content.replace('<![CDATA[','').replace(']]>','')
+      chemin = re.findall('<chemin>([^.*?]+)</chemin>',content)
+      nom = re.findall('<nom>([^.*?]+)</nom>',content)
+      Log(nom)
+      videopath = chemin[0] + nom[0]
+      Log(videopath)
+      if videopath != None:
+        return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
     except:
       return None
 
@@ -142,10 +166,12 @@ def get_thumb (url):
       return R(ICON)
 
 def RSS_parser(sender, pageurl , replaceParent=False,):
-    dir = MediaContainer(title2=sender.itemTitle, viewGroup="List", replaceParent=replaceParent)
-    for tag in XML.ElementFromURL(pageurl,encoding = "iso-8859-1").xpath('//item'):
-      url = unicode(tag.xpath("link")[0].text,"utf-8")
-      title = tag.xpath("title")[0].text
+    dir = MediaContainer(title2=sender.itemTitle, viewGroup="List", replaceParent=replaceParent,httpCookies=HTTP.GetCookiesForURL('http://www.pluzz.fr/'))
+    rawpage = HTTP.Request(pageurl).content.replace('<![CDATA[','').replace(']]>','')
+    for tag in XML.ElementFromString(rawpage,encoding = "iso-8859-1").xpath('//item'):
+      Log(XML.StringFromElement(tag))
+      url = 'http://www.pluzz.fr/'+tag.xpath("origlink")[0].text.split('/')[-1]
+      title = tag.xpath("title",encoding = "iso-8859-1")[0].text
       if title != None:
         dir.Append(Function(VideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=Function(get_thumb, url = url)),url=url))
 
