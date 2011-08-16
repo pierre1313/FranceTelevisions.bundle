@@ -139,11 +139,10 @@ def get_stream (sender,url):
       link = HTML.ElementFromURL(url).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
       content = HTTP.Request(INFO_PATH + link.split('=')[-1]).content
       content = content.replace('<![CDATA[','').replace(']]>','')
-      chemin = re.findall('<chemin>([^.*?]+)</chemin>',content)
-      nom = re.findall('<nom>([^.*?]+)</nom>',content)
-      Log(nom)
-      videopath = chemin[0] + nom[0]
-      Log(videopath)
+      content = XML.ElementFromString(content)
+      chemin = content.xpath('//fichiers/fichier/chemin')[0].text
+      nom = content.xpath('//fichiers/fichier/nom')[0].text
+      videopath = chemin + nom
       if videopath != None:
         return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
     except:
