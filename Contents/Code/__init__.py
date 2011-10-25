@@ -8,6 +8,8 @@ PLUGIN_REVISION         = 0.6
 PLUGIN_UPDATES_ENABLED  = True
 
 PLAYER_PATH = "mms://a988.v101995.c10199.e.vm.akamaistream.net/7/988/10199/3f97c7e6/ftvigrp.download.akamai.com/10199/cappuccino/production/publication/"
+RTMP_STREAM_PATH = "rtmp://videozones-rtmp.francetv.fr/ondemand/"
+RTMP_STREAM_CLIP = "mp4:cappuccino/publication"
 INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
 
 NAME = L('France Televisions')
@@ -17,6 +19,8 @@ ICON          = 'icon-default.png'
 
 FEED_BASE_URL = "http://feeds.feedburner.com/Pluzz-%s?format=xml"
 LOGO_URL = "http://www.francetelevisions.fr/images/france%s_logo.gif"
+
+FEEDBURNER_NS = {'feedburner':'http://rssnamespace.org/feedburner/ext/1.0'}
 
 ####################################################################################################  
 
@@ -143,8 +147,12 @@ def get_stream (sender,url):
       chemin = content.xpath('//fichiers/fichier/chemin')[0].text
       nom = content.xpath('//fichiers/fichier/nom')[0].text
       videopath = chemin + nom
+      #Log(videopath)
       if videopath != None:
-        return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
+        if "wmv"in nom:
+          return Redirect(WindowsMediaVideoItem(unicode(PLAYER_PATH + "/" + videopath,"utf-8")))
+        else:
+          return Redirect(RTMPVideoItem(url = RTMP_STREAM_PATH, clip = RTMP_STREAM_CLIP + unicode(videopath,"utf-8")))
     except:
       return None
 
@@ -153,7 +161,7 @@ def get_thumb (url):
       content = HTML.ElementFromURL(url).xpath("head/meta[@name='programme_image']")
       for item in content:
         imagepath = item.get("content")
-        Log(imagepath)
+        #Log(imagepath)
         if imagepath != None:
           if 'http' in imagepath:
             return DataObject(HTTP.Request(imagepath).content,'image/'+imagepath[-3:])
@@ -165,13 +173,21 @@ def get_thumb (url):
       return R(ICON)
 
 def RSS_parser(sender, pageurl , replaceParent=False,):
-    dir = MediaContainer(title2=sender.itemTitle, viewGroup="List", replaceParent=replaceParent,httpCookies=HTTP.GetCookiesForURL('http://www.pluzz.fr/'))
-    rawpage = HTTP.Request(pageurl).content.replace('<![CDATA[','').replace(']]>','')
-    for tag in XML.ElementFromString(rawpage,encoding = "iso-8859-1").xpath('//item'):
+    dir = MediaContainer(title2=sender.itemTitle, viewGroup="InfoList", replaceParent=replaceParent,httpCookies=HTTP.CookiesForURL('http://www.pluzz.fr/'))
+    #rawpage = HTTP.Request(pageurl).content.replace('<![CDATA[','').replace(']]>','')
+    try:
+      items = XML.ElementFromURL(pageurl,encoding = "iso-8859-1")
+    except:
+      items = XML.ElementFromURL(pageurl)
+    for tag in items.xpath('//item'):
       Log(XML.StringFromElement(tag))
-      url = 'http://www.pluzz.fr/'+tag.xpath("origlink")[0].text.split('/')[-1]
-      title = tag.xpath("title",encoding = "iso-8859-1")[0].text
+      url = 'http://www.pluzz.fr/'+tag.xpath("feedburner:origLink",namespaces = FEEDBURNER_NS)[0].text.split('/')[-1]
+      title = tag.xpath("title")[0].text.encode("iso-8859-1")
+      try:
+        description = tag.xpath("description",encoding = "iso-8859-1")[0].text.split('<')[0]#.encode("iso-8859-1")
+      except:
+        description = None
       if title != None:
-        dir.Append(Function(VideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary='',thumb=Function(get_thumb, url = url)),url=url))
+        dir.Append(Function(VideoItem(get_stream,width=384,height=216,title=tag.xpath("title")[0].text,summary=description,thumb=Function(get_thumb, url = url)),url=url))
 
     return dir
