@@ -10,8 +10,8 @@ PLUGIN_UPDATES_ENABLED  = True
 PLAYER_PATH = "mms://a988.v101995.c10199.e.vm.akamaistream.net/7/988/10199/3f97c7e6/ftvigrp.download.akamai.com/10199/cappuccino/production/publication/"
 RTMP_STREAM_PATH = "rtmp://videozones-rtmp.francetv.fr/ondemand/"
 RTMP_STREAM_CLIP = "mp4:cappuccino/publication"
-INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
-
+#INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
+INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosOeuvre.php?mode=zeri&id-diffusion="
 NAME = L('France Televisions')
 
 ART           = 'art-default.jpg'
@@ -144,8 +144,17 @@ def get_stream (sender,url):
       content = HTTP.Request(INFO_PATH + link.split('=')[-1]).content
       content = content.replace('<![CDATA[','').replace(']]>','')
       content = XML.ElementFromString(content)
+      
+      filepath =  content.xpath('//oeuvre/videos/video[format="wmv"]/url')[0].text
+      Log(filepath)
+      try:
+		return Redirect(WindowsMediaVideoItem(unicode(content.xpath('//oeuvre/videos/video[format="wmv"]/url')[0].text,"utf-8")))
+      except:
+	  	return None# Redirect(RTMPVideoItem(url = RTMP_STREAM_PATH, clip = RTMP_STREAM_CLIP + unicode(videopath,"utf-8")))
+
       chemin = content.xpath('//fichiers/fichier/chemin')[0].text
       nom = content.xpath('//fichiers/fichier/nom')[0].text
+      
       videopath = chemin + nom
       #Log(videopath)
       if videopath != None:
