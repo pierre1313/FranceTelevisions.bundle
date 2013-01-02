@@ -10,8 +10,8 @@ PLUGIN_UPDATES_ENABLED  = True
 PLAYER_PATH = "mms://a988.v101995.c10199.e.vm.akamaistream.net/7/988/10199/3f97c7e6/ftvigrp.download.akamai.com/10199/cappuccino/production/publication/"
 RTMP_STREAM_PATH = "rtmp://videozones-rtmp.francetv.fr/ondemand/"
 RTMP_STREAM_CLIP = "mp4:cappuccino/publication"
-#INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
-INFO_PATH = "http://www.pluzz.fr/appftv/webservices/video/getInfosOeuvre.php?mode=zeri&id-diffusion="
+#INFO_PATH = "http://pluzz.francetv.fr/appftv/webservices/video/getInfosVideo.php?src=capuccino&video-type=simple&template=ftvi&template-format=complet&id-externe="
+INFO_PATH = "http://pluzz.francetv.fr/appftv/webservices/video/getInfosOeuvre.php?mode=zeri&id-diffusion="
 NAME = L('France Televisions')
 
 ART           = 'art-default.jpg'
@@ -29,7 +29,7 @@ class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_404(self, req, fp, code, msg, headers):
         result = urllib2.HTTPRedirectHandler.http_error_404(
             self, req, fp, code, msg, headers)
-        Log(msg)
+        #Log(msg)
         return result
 
     def http_error_302(self, req, fp, code, msg, headers):
@@ -65,7 +65,7 @@ def VideoMainMenu():
 
     dir = MediaContainer(viewGroup="List")
 
-    dir.Append(Function(DirectoryItem(RSS_parser,"Tous les programmes"),pageurl = "http://www.pluzz.fr/rss" ))
+    dir.Append(Function(DirectoryItem(RSS_parser,"Tous les programmes"),pageurl = "http://pluzz.francetv.fr/rss" ))
     dir.Append(Function(DirectoryItem(ChannelSubMenu,"Par chaîne")))
     dir.Append(Function(DirectoryItem(GenreSubMenu,"Par genre")))
     dir.Append(Function(DirectoryItem(RegionSubMenu,"Par région")))
@@ -140,13 +140,12 @@ def RegionSubMenu (sender):
 
 def get_stream (sender,url):
     try:
-      link = HTML.ElementFromURL(url).xpath('//div[@id="playerCtnr"]/a')[0].get('href')
+      link = HTML.ElementFromURL(url).xpath('//figure[@class="pe-player"]/a')[0].get('href')
       content = HTTP.Request(INFO_PATH + link.split('=')[-1]).content
       content = content.replace('<![CDATA[','').replace(']]>','')
       content = XML.ElementFromString(content)
       
       filepath =  content.xpath('//oeuvre/videos/video[format="wmv"]/url')[0].text
-      Log(filepath)
       try:
 		return Redirect(WindowsMediaVideoItem(unicode(content.xpath('//oeuvre/videos/video[format="wmv"]/url')[0].text,"utf-8")))
       except:
@@ -182,15 +181,15 @@ def get_thumb (url):
       return R(ICON)
 
 def RSS_parser(sender, pageurl , replaceParent=False,):
-    dir = MediaContainer(title2=sender.itemTitle, viewGroup="InfoList", replaceParent=replaceParent,httpCookies=HTTP.CookiesForURL('http://www.pluzz.fr/'))
+    dir = MediaContainer(title2=sender.itemTitle, viewGroup="InfoList", replaceParent=replaceParent,httpCookies=HTTP.CookiesForURL('http://pluzz.francetv.fr/'))
     #rawpage = HTTP.Request(pageurl).content.replace('<![CDATA[','').replace(']]>','')
     try:
       items = XML.ElementFromURL(pageurl,encoding = "iso-8859-1")
     except:
       items = XML.ElementFromURL(pageurl)
     for tag in items.xpath('//item'):
-      Log(XML.StringFromElement(tag))
-      url = 'http://www.pluzz.fr/'+tag.xpath("feedburner:origLink",namespaces = FEEDBURNER_NS)[0].text.split('/')[-1]
+      #Log(XML.StringFromElement(tag))
+      url = 'http://pluzz.francetv.fr/videos/'+tag.xpath("feedburner:origLink",namespaces = FEEDBURNER_NS)[0].text.split('/')[-1]
       title = tag.xpath("title")[0].text.encode("iso-8859-1")
       try:
         description = tag.xpath("description",encoding = "iso-8859-1")[0].text.split('<')[0]#.encode("iso-8859-1")
